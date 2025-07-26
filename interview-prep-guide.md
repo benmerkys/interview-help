@@ -12,8 +12,6 @@
 * Security & Networking Cheat Sheet (TLS, IAM, Secrets, Subnetting, Firewalls)
 * Deployment Strategies: Blue/Green & Canary
 
----
-
 ## 🧠 Kubernetes Cheat Sheet for Technical Interviews
 
 Kubernetes is a container orchestration platform. Core components:
@@ -31,8 +29,6 @@ Advanced concepts:
 * **CRDs**: Custom resources (e.g., `KafkaCluster`)
 * **Ingress Controllers**: Manage external traffic routing
 * **Deployments**: Abstract pod updates, rolling changes
-
----
 
 ## 🚨 Example Kubernetes Troubleshooting: 60/100 Pods in Error State
 
