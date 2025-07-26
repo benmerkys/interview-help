@@ -83,42 +83,88 @@ kubectl rollout undo deploy <name>
 
 ## 🧱 Terraform Cheat Sheet for SRE/Platform Interviews
 
-Terraform is a tool for declaratively managing infrastructure.
+Terraform is a powerful open-source tool used to **provision and manage infrastructure** declaratively across cloud providers. For SRE and Platform roles, it's often used to define infrastructure-as-code (IaC), manage multi-cloud deployments, and enforce consistency via automation.
 
-### Key Concepts
+### 📘 Key Concepts
 
-* Resources (`resource "aws_instance"`)
-* Variables (`variable "region"`)
-* Outputs
-* Modules for reuse
-* Remote state (e.g., S3 + DynamoDB)
-* Workspaces (env separation)
-* `backend`, `provider`, `locals`
+| Concept     | Description                                          |
+| ----------- | ---------------------------------------------------- |
+| `resource`  | Defines a specific cloud resource, e.g. EC2, IAM, S3 |
+| `variable`  | Parameterise configurations for reusability          |
+| `output`    | Export values (e.g., public IP, KMS ARN)             |
+| `module`    | Group related resources, reuse across projects       |
+| `provider`  | Connects Terraform to AWS, Azure, GCP, etc.          |
+| `backend`   | Where Terraform stores state (e.g., S3 + DynamoDB)   |
+| `workspace` | Used to separate environments (e.g., dev, prod)      |
+| `locals`    | Define calculated values for reuse inside configs    |
+| `data`      | Fetch external info (e.g., existing VPCs, AMIs)      |
 
-### Common Commands
+### 📦 Terraform Folder Structure (Recommended)
 
-```bash
-terraform init
-terraform validate
-terraform plan
-terraform apply
-terraform destroy
+```
+.
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── backend.tf
+└── modules/
+    ├── network/
+    ├── iam/
+    └── eks/
 ```
 
-### Troubleshooting Scenarios
+Use `terragrunt` to wrap this structure for:
 
-| Problem         | Fix                                        |
-| --------------- | ------------------------------------------ |
-| Locked state    | `terraform force-unlock`                   |
-| Drift           | `terraform refresh`                        |
-| Plan fails      | Validate variable values, resource changes |
-| S3 state issues | Check backend config, bucket policy        |
+* Multi-environment management
+* Centralised backends
+* DRY (`Don't Repeat Yourself`) configurations
 
-### Tips
+### 🛠️ Common Terraform Commands
 
-* Use `terraform fmt` and `terraform-docs`
-* Split modules by domain (e.g., `network`, `iam`, `eks`)
-* Use `terragrunt` for multi-envs and DRY structure
+```bash
+terraform init               # Initialise the working directory
+terraform validate           # Syntax check
+terraform plan -out=plan.tfplan   # Preview changes
+terraform apply plan.tfplan       # Apply with pre-generated plan
+terraform destroy            # Tear everything down
+terraform fmt                # Format configs
+terraform output             # View output values
+terraform show               # View full state
+```
+
+### 🧪 Troubleshooting Scenarios
+
+| Problem                    | What to Check / Fix                                             |
+| -------------------------- | --------------------------------------------------------------- |
+| 🔒 Locked state file       | `terraform force-unlock <lock-id>`                              |
+| 🌀 Resource drift          | `terraform refresh`, compare against real infra                 |
+| ❌ Plan fails               | Missing variables? Wrong provider version? Changed resources?   |
+| ⚠️ State backend error     | Check S3 bucket policy, IAM role access, DynamoDB locking table |
+| 🔁 Cyclical dependencies   | Use `depends_on` explicitly                                     |
+| ☁️ Provider version issues | Pin versions in `required_providers` block                      |
+
+### 🧰 Remote State Best Practices
+
+* Store state in **S3**, lock with **DynamoDB**
+* Encrypt state at rest (`bucket` with SSE or KMS)
+* Use **workspaces** sparingly — prefer directory structure for envs
+* Enable **versioning** on state bucket to recover accidental applies
+
+### ✅ Terraform Best Practices
+
+* Use **`terraform-docs`** to auto-generate module documentation
+* Run `terraform plan` in CI/CD before every apply (e.g., via GitLab or GitHub Actions)
+* Protect production applies behind approvals or pipelines
+* Tag all resources with `env`, `team`, `owner`, `cost-center`
+* Use `pre-commit` hooks with `tflint`, `tfsec`, and `checkov` for security scanning
+
+### 🔁 Canary / Blue-Green with Terraform?
+
+While Terraform is typically used for infra, you can:
+
+* Use **feature flags** in variables to deploy different versions
+* Combine with CI/CD (GitLab) to deploy green infra, test, then cut over
+* Manage DNS, Load Balancer weights via Terraform for phased rollout
 
 ## 🚀 GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
 
