@@ -313,8 +313,6 @@ Get-AzVM | Where-Object { $_.PowerState -eq "VM running" }
 * “In our GitLab CI pipeline, I used Bash scripts to tag Docker images and push them to ECR.”
 * “I wrote a PowerShell script that automatically shuts down non-prod Azure VMs on weekends to save costs.”
 
-✅ **Be prepared to explain what your script does line-by-line.**
-
 ---
 
 ## 🔐 Security & Networking Cheat Sheet
