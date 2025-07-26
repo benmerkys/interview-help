@@ -7,7 +7,7 @@
 ## 📚 Searchable Topics (Use CTRL+F to Jump to Sections)
 
 * Kubernetes Cheat Sheet for Technical Interviews
-* Kubernetes Troubleshooting: 60/100 Pods in Error State
+* Example Kubernetes Troubleshooting: 60/100 Pods in Error State
 * Kubernetes Deployment Failing: Troubleshooting Guide
 * Terraform Cheat Sheet for SRE/Platform Interviews
 * GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
@@ -38,7 +38,7 @@ Advanced concepts:
 
 ---
 
-## 🚨 Kubernetes Troubleshooting: 60/100 Pods in Error State
+## 🚨 Example Kubernetes Troubleshooting: 60/100 Pods in Error State
 
 ### Step 1: Overview
 
