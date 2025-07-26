@@ -67,8 +67,6 @@ kubectl describe node <node>
 kubectl exec -it <pod> -- curl <svc>
 ```
 
----
-
 ## 🧨 Kubernetes Deployment Failing: Troubleshooting Guide
 
 ### Checklist
@@ -82,8 +80,6 @@ kubectl exec -it <pod> -- curl <svc>
 ```bash
 kubectl rollout undo deploy <name>
 ```
-
----
 
 ## 🧱 Terraform Cheat Sheet for SRE/Platform Interviews
 
@@ -123,8 +119,6 @@ terraform destroy
 * Use `terraform fmt` and `terraform-docs`
 * Split modules by domain (e.g., `network`, `iam`, `eks`)
 * Use `terragrunt` for multi-envs and DRY structure
-
----
 
 ## 🚀 GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
 
@@ -166,13 +160,9 @@ terraform-plan:
 | Secret missing    | Check CI/CD Variable scope         |
 | Cache not working | Validate `paths:` and `key:` usage |
 
----
-
 ## 📊 Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
 
 Effective monitoring and observability help you detect, investigate, and fix problems before users are affected. You’ll often be expected to **instrument**, **visualise**, and **alert** on metrics/logs — especially in Kubernetes or multi-cloud environments.
-
----
 
 ### 🔭 Prometheus
 
@@ -224,8 +214,6 @@ Send to: Slack, PagerDuty, Email
 | Gaps in data     | Pod/node restarts   | Increase retention, enable WAL replay   |
 | Alert not firing | Query logic wrong   | Test with `PromQL` in console           |
 
----
-
 ### 📈 Grafana
 
 #### ✅ What it is:
@@ -251,8 +239,6 @@ A dashboarding tool for visualising metrics, logs, traces (a full observability 
 | No data in panel      | Check query, datasource connection        |
 | High panel load times | Use `rate()` or downsampled metrics       |
 | Alert not triggering  | Review thresholds and alert state history |
-
----
 
 ### 📚 ELK Stack (Elasticsearch, Logstash, Kibana)
 
@@ -286,8 +272,6 @@ A popular stack for **log aggregation, analysis, and search**.
 | Index bloating | Too many fields                          | Enable field filtering in Beats          |
 | Search slow    | Unoptimised queries or large time ranges | Use filters instead of full-text queries |
 
----
-
 ### 🔀 Putting It All Together
 
 | Tool       | Data Type       | Strength                                    |
@@ -297,19 +281,9 @@ A popular stack for **log aggregation, analysis, and search**.
 | ELK Stack  | Logs            | Log analytics, debugging complex issues     |
 | Loki       | Logs (like ELK) | Fast, Prometheus-style logs (less overhead) |
 
----
-
-Perfect, Ben — glad that fixed the YAML issue in the markdown file.
-
-Let’s now expand on the **"Scripting Cheat Sheet"** section of your interview prep guide.
-
----
-
 ## 🧾 Scripting Cheat Sheet (Python, Bash, PowerShell)
 
 Scripting is key in SRE/Platform roles for **automation**, **integration**, and **troubleshooting**. Expect to use it for provisioning, monitoring, CI/CD tasks, or data wrangling.
-
----
 
 ### 🐍 Python
 
@@ -343,8 +317,6 @@ else:
 * Process Prometheus/Grafana metrics
 * Automate GitLab MR comments / labels
 
----
-
 ### 🖥️ Bash
 
 **Why use it:**
@@ -376,8 +348,6 @@ done
 kubectl get pods -A | grep CrashLoopBackOff
 ```
 
----
-
 ### 🪟 PowerShell
 
 **Why use it:**
@@ -397,13 +367,10 @@ Get-AzVM | Where-Object { $_.PowerState -eq "VM running" }
 * Query Entra ID groups/users
 * Trigger builds or actions in Azure DevOps
 
----
-
 ## 🔐 Security & Networking Cheat Sheet (TLS, IAM, Secrets, Subnetting, Firewalls)
 
 Security and networking aren’t just checkboxes — they’re foundational to platform reliability. Whether you're deploying apps, configuring policies, or locking down internal traffic, expect to **automate**, **enforce**, and **debug** security controls daily.
 
----
 
 ### 🔐 TLS & Encryption in Transit
 
@@ -429,8 +396,6 @@ TLS ensures encrypted communication between clients and services. In Kubernetes,
 * 🔐 mTLS handshake failure? → Incompatible trust roots or mesh misconfig
 * 🌐 HTTP instead of HTTPS? → Ingress config missing TLS block
 
----
-
 ### 🧑‍💼 IAM / Identity & Access Management
 
 #### 📘 What It Is:
@@ -448,8 +413,6 @@ IAM ensures users, services, and workloads can **only do what they're supposed t
 #### 🛠️ Interview Tip:
 
 > "We used IRSA to give our Kubernetes pods temporary access to S3 buckets using scoped IAM policies, reducing the need for static secrets."
-
----
 
 ### 🧪 Secrets Management
 
@@ -477,8 +440,6 @@ Secrets include passwords, API keys, TLS certs — anything confidential.
 * `kubectl describe pod` → shows which secret failed to mount
 * Confirm RBAC access to secrets
 
----
-
 ### 🌐 Subnetting & VPCs
 
 #### 📘 What It Is:
@@ -503,8 +464,6 @@ Organising IP ranges for workloads, services, and endpoints — **core to routin
 * Pod stuck in `Pending` → insufficient IPs in subnet
 * Node unreachable → route table or security group missing
 * DNS failures → CoreDNS can’t resolve across peered VPCs
-
----
 
 ### 🔥 Firewalls & Network Rules
 
@@ -541,8 +500,6 @@ spec:
 * 🔒 Service unreachable? Check NSG/SG and pod NetworkPolicy
 * 🧱 Timeout but no error? Check route table or firewall silently dropping
 * 🔄 ClusterIP unreachable from outside? Not exposed through LoadBalancer or ingress
-
----
 
 ## 🚦 Deployment Strategies: Blue/Green & Canary
 
@@ -585,5 +542,3 @@ CI/CD Tools Support:
 
 * **GitLab**: Canary stages + manual approvals
 * **Argo Rollouts**: Native CRD support for progressive delivery
-
----
