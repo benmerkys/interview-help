@@ -3,8 +3,8 @@
 ## 📚 Searchable Topics (Use CTRL+F to Jump to Sections)
 
 * Kubernetes Cheat Sheet for Technical Interviews
-* Example Kubernetes Troubleshooting: 60/100 Pods in Error State
-* Kubernetes Deployment Failing: Troubleshooting Guide
+* Example - Kubernetes Pod Troubleshooting
+* Example - Kubernetes Deployment Troubleshooting
 * Terraform Cheat Sheet for SRE/Platform Interviews
 * GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
 * Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
@@ -59,7 +59,7 @@ metadata:
   name: my-kafka
 ```
 
-## 🚨 Kubernetes Troubleshooting: 60/100 Pods in Error State
+## 🚨 Example - Kubernetes Pod Troubleshooting
 
 ### 🧭 Step 1: Cluster Overview
 
@@ -139,7 +139,7 @@ kubectl run debug --rm -it --image=busybox -- /bin/sh
 
 Use to test DNS, outbound access, tokens, or mount visibility.
 
-## 🧨 Kubernetes Deployment Failing: Troubleshooting Guide
+## 🧨 Example - Kubernetes Deployment Troubleshooting
 
 ### 🧾 Checklist for Debugging Deployments
 
