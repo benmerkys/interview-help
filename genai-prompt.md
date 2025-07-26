@@ -40,7 +40,7 @@
 >
 > ---
 
-> I’ll send you one keyword at a time. Start when you're ready.
+> I’ll send you one keyword at a time.
 
 ---
 
