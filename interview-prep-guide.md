@@ -10,7 +10,7 @@
 * Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
 * Scripting Cheat Sheet (Python, Bash, PowerShell)
 * Security & Networking Cheat Sheet (TLS, IAM, Secrets, Subnetting, Firewalls)
-* Deployment Strategies: Blue/Green & Canary
+* Deployment Strategies Cheat Sheet (Blue/Green, Canary & More)
 
 ## 🧠 Kubernetes Cheat Sheet for Technical Interviews
 
