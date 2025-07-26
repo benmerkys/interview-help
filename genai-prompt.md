@@ -1,5 +1,3 @@
----
-
 # 📌 **GenAI Prompt for SRE/Platform Engineer Interview Prep (with Job Description)**
 
 > I’m preparing for a **Platform Engineer / Site Reliability Engineer (SRE)** interview. I will send you **keywords** like “Terraform”, “GitLab CI”, “IAM”, or “Kubernetes troubleshooting”.
