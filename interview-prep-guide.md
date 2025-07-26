@@ -410,10 +410,6 @@ IAM ensures users, services, and workloads can **only do what they're supposed t
 | Azure | Entra ID, RBAC, Managed Identities | Azure AD pod identity / workload identity |
 | GCP   | IAM Roles, Workload Identity       | Annotate SA to bind GCP IAM role          |
 
-#### 🛠️ Interview Tip:
-
-> "We used IRSA to give our Kubernetes pods temporary access to S3 buckets using scoped IAM policies, reducing the need for static secrets."
-
 ### 🧪 Secrets Management
 
 #### 📘 What It Is:
