@@ -1,5 +1,3 @@
----
-
 # 🚀 Platform Engineer / SRE Interview Prep Guide
 
 ---
@@ -14,7 +12,7 @@
 * Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
 * Scripting Cheat Sheet (Python, Bash, PowerShell)
 * Security & Networking Cheat Sheet (TLS, IAM, Secrets, Subnetting, Firewalls)
-* Deployment Strategies: Blue/Green, Canary
+* Deployment Strategies: Blue/Green & Canary
 
 ---
 
