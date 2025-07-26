@@ -176,32 +176,134 @@ terraform-plan:
 
 ---
 
-## 📊 Monitoring & Logging Cheat Sheet
+## 📊 Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
 
-### Prometheus
+Effective monitoring and observability help you detect, investigate, and fix problems before users are affected. You’ll often be expected to **instrument**, **visualise**, and **alert** on metrics/logs — especially in Kubernetes or multi-cloud environments.
 
-* Metrics collection
-* PromQL queries for alerts
+---
+
+### 🔭 Prometheus
+
+#### ✅ What it is:
+
+A pull-based, time-series metrics collector often used in Kubernetes and SRE platforms.
+
+#### 🔧 Core Concepts:
+
+* **Exporters** – expose metrics in Prometheus format (e.g., `node_exporter`, `kube-state-metrics`)
+* **TSDB** – built-in storage engine
+* **Pull model** – Prometheus scrapes endpoints on a schedule
+* **PromQL** – query language for metrics and alerting
+
+#### 🧪 Sample PromQL Queries:
 
 ```promql
-rate(http_requests_total[5m])
+# CPU usage per pod
+rate(container_cpu_usage_seconds_total[5m])
+
+# Request error rate
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+
+# Pod restart spike
+increase(kube_pod_container_status_restarts_total[15m]) > 3
 ```
 
-### Grafana
+#### 📦 Kubernetes Integration:
 
-* Dashboards from Prometheus, Loki, Elasticsearch
+* Helm charts deploy Prometheus + Alertmanager
+* Use `ServiceMonitor` and `PodMonitor` CRDs (via Prometheus Operator)
 
-### ELK Stack
+#### 🚨 Alerting:
 
-* Elasticsearch: storage/search
-* Logstash: parsing/transform
-* Kibana: query/visualisation
+Set up **Alertmanager** for:
 
-### Troubleshooting
+* CPU/memory saturation
+* Pod crash loops
+* Slow API responses
+* Disk usage alerts
 
-* Metrics missing? → Exporter issue
-* Alerts not firing? → Query or threshold wrong
-* Log delay? → ES queue or disk pressure
+Send to: Slack, PagerDuty, Email
+
+#### 🛠️ Common Troubleshooting:
+
+| Problem          | Reason              | Fix                                     |
+| ---------------- | ------------------- | --------------------------------------- |
+| Metrics missing  | Target not scraping | Check ServiceMonitor or relabel configs |
+| Gaps in data     | Pod/node restarts   | Increase retention, enable WAL replay   |
+| Alert not firing | Query logic wrong   | Test with `PromQL` in console           |
+
+---
+
+### 📈 Grafana
+
+#### ✅ What it is:
+
+A dashboarding tool for visualising metrics, logs, traces (a full observability UI).
+
+#### 💡 Features:
+
+* Datasources: Prometheus, Loki, Elasticsearch, PostgreSQL
+* Templated dashboards: dynamic filters
+* Alerting (legacy and unified alerting)
+
+#### 🧰 Use Cases:
+
+* Live dashboard: CPU, memory, request rate
+* On-call SRE: check latency, error rates, and saturation
+* Dev teams: application-specific dashboards
+
+#### 🚨 Troubleshooting:
+
+| Problem               | Fix                                       |
+| --------------------- | ----------------------------------------- |
+| No data in panel      | Check query, datasource connection        |
+| High panel load times | Use `rate()` or downsampled metrics       |
+| Alert not triggering  | Review thresholds and alert state history |
+
+---
+
+### 📚 ELK Stack (Elasticsearch, Logstash, Kibana)
+
+#### ✅ What it is:
+
+A popular stack for **log aggregation, analysis, and search**.
+
+* **Elasticsearch** – full-text index & storage
+* **Logstash** – log pipeline (input, filter, output)
+* **Kibana** – visualisation layer
+
+📝 Often used via **Beats** (e.g., Filebeat, Metricbeat) to ship logs from Kubernetes nodes.
+
+#### 🧰 Common Use Cases:
+
+* View `stderr/stdout` logs from pods
+* Filter logs by container name, namespace, correlation ID
+* Detect error spikes, parse app logs (e.g. Java stack traces)
+
+#### ⚙️ Indexing & Storage Tips:
+
+* Use ILM (Index Lifecycle Management)
+* Roll over indexes daily or based on size
+* Archive to S3-compatible storage (if needed)
+
+#### 🛠️ Troubleshooting:
+
+| Symptom        | Cause                                    | Fix                                      |
+| -------------- | ---------------------------------------- | ---------------------------------------- |
+| Delayed logs   | Logstash pipeline or queue backpressure  | Check filter plugins and output health   |
+| Index bloating | Too many fields                          | Enable field filtering in Beats          |
+| Search slow    | Unoptimised queries or large time ranges | Use filters instead of full-text queries |
+
+---
+
+### 🔀 Putting It All Together
+
+| Tool       | Data Type       | Strength                                    |
+| ---------- | --------------- | ------------------------------------------- |
+| Prometheus | Metrics         | Best for numerical alerts & autoscaling     |
+| Grafana    | Metrics + UI    | Visualisation + Alerting + Dashboards       |
+| ELK Stack  | Logs            | Log analytics, debugging complex issues     |
+| Loki       | Logs (like ELK) | Fast, Prometheus-style logs (less overhead) |
 
 ---
 
@@ -305,45 +407,148 @@ Get-AzVM | Where-Object { $_.PowerState -eq "VM running" }
 
 ---
 
-### 🔧 Interview Tips
+## 🔐 Security & Networking Cheat Sheet (TLS, IAM, Secrets, Subnetting, Firewalls)
 
-✅ **Use scripting when describing automation or debugging tasks**, e.g.:
-
-* “I used Python with `boto3` to rotate secrets stored in AWS Secrets Manager automatically.”
-* “In our GitLab CI pipeline, I used Bash scripts to tag Docker images and push them to ECR.”
-* “I wrote a PowerShell script that automatically shuts down non-prod Azure VMs on weekends to save costs.”
+Security and networking aren’t just checkboxes — they’re foundational to platform reliability. Whether you're deploying apps, configuring policies, or locking down internal traffic, expect to **automate**, **enforce**, and **debug** security controls daily.
 
 ---
 
-## 🔐 Security & Networking Cheat Sheet
+### 🔐 TLS & Encryption in Transit
 
-### TLS
+#### 📘 What It Is:
 
-* Managed via cert-manager or cloud-native (ACM, Key Vault)
-* mTLS for service-to-service encryption
+TLS ensures encrypted communication between clients and services. In Kubernetes, it's often used:
 
-### IAM / Identity
+* At ingress layer (HTTPS via NGINX, Traefik)
+* For service-to-service encryption (mTLS)
 
-* **AWS**: IAM Roles, IRSA
-* **Azure**: Entra ID + RBAC
-* **GCP**: Workload Identity
+#### 🔧 Tooling:
 
-### Secrets Management
+| Tool                | Use Case                                          |
+| ------------------- | ------------------------------------------------- |
+| **cert-manager**    | Auto-generates TLS certs via ACME (Let's Encrypt) |
+| **AWS ACM**         | TLS for ELB/ALB, managed renewal                  |
+| **Azure Key Vault** | Stores & manages TLS certs securely               |
+| **Istio / Linkerd** | For mutual TLS (mTLS) in service mesh             |
 
-* K8s Secrets (base64, weak)
-* Use Vault / External Secrets Operator
+#### 🛠️ Troubleshooting:
 
-### Subnetting
+* 🔒 Certificate expired? → Check renewal logs from cert-manager
+* 🔐 mTLS handshake failure? → Incompatible trust roots or mesh misconfig
+* 🌐 HTTP instead of HTTPS? → Ingress config missing TLS block
 
-* Private/public split
-* NAT for outbound access
-* Pod CIDRs must not overlap VPC
+---
 
-### Firewalls
+### 🧑‍💼 IAM / Identity & Access Management
 
-* AWS: SGs + NACLs
-* Azure: NSGs
-* GCP: Firewall rules (tag-based)
+#### 📘 What It Is:
+
+IAM ensures users, services, and workloads can **only do what they're supposed to** — principle of least privilege (PoLP).
+
+#### ✅ Common Mechanisms:
+
+| Cloud | IAM Mechanism                      | Kubernetes Integration                    |
+| ----- | ---------------------------------- | ----------------------------------------- |
+| AWS   | IAM Roles, Policies, **IRSA**      | ServiceAccount + OIDC + Role              |
+| Azure | Entra ID, RBAC, Managed Identities | Azure AD pod identity / workload identity |
+| GCP   | IAM Roles, Workload Identity       | Annotate SA to bind GCP IAM role          |
+
+#### 🛠️ Interview Tip:
+
+> "We used IRSA to give our Kubernetes pods temporary access to S3 buckets using scoped IAM policies, reducing the need for static secrets."
+
+---
+
+### 🧪 Secrets Management
+
+#### 📘 What It Is:
+
+Secrets include passwords, API keys, TLS certs — anything confidential.
+
+#### 🔧 Tools:
+
+| Method                 | Pros                          | Cons                           |
+| ---------------------- | ----------------------------- | ------------------------------ |
+| **K8s Secrets**        | Native, fast                  | Base64 = not encrypted         |
+| **External Secrets**   | Sync from Vault/SSM/Key Vault | More secure, needs setup       |
+| **Vault by HashiCorp** | Highly secure, audited        | Requires auth and unseal logic |
+
+#### 🔐 Patterns:
+
+* Prefer **External Secrets Operator** for dynamic secrets
+* Rotate secrets via Terraform or CI/CD hooks
+* Store in secret backends, not Git!
+
+#### 🛠️ Debugging:
+
+* `CreateContainerConfigError` → missing secret ref
+* `kubectl describe pod` → shows which secret failed to mount
+* Confirm RBAC access to secrets
+
+---
+
+### 🌐 Subnetting & VPCs
+
+#### 📘 What It Is:
+
+Organising IP ranges for workloads, services, and endpoints — **core to routing & firewalling**.
+
+#### Key Patterns:
+
+* Public subnets: expose LB/Ingress
+* Private subnets: pods, DBs, internal services
+* NAT Gateway: outbound internet for private subnets
+* Pod CIDRs must **not overlap** VPC CIDRs
+
+#### 🛠️ Cloud-Specific Notes:
+
+* **AWS VPC CNI plugin** requires ENIs for pod networking
+* Use `ip-masq-agent` to control NAT traffic in GKE
+* Azure requires `AzureCNI` or `Kubenet` for subnet mapping
+
+#### 🛠️ Troubleshooting:
+
+* Pod stuck in `Pending` → insufficient IPs in subnet
+* Node unreachable → route table or security group missing
+* DNS failures → CoreDNS can’t resolve across peered VPCs
+
+---
+
+### 🔥 Firewalls & Network Rules
+
+#### 📘 What It Is:
+
+Controls **who can talk to what** — important for lateral movement protection, microsegmentation, and compliance.
+
+#### 🔧 Cloud-Specific:
+
+| Cloud | Ingress Control         | Egress Control      |
+| ----- | ----------------------- | ------------------- |
+| AWS   | Security Groups, NACLs  | NACLs, Routing      |
+| Azure | NSGs (per NIC/subnet)   | NSGs + Route Tables |
+| GCP   | Firewall Rules (tagged) | Egress rules        |
+
+#### 🧰 Kubernetes-Level:
+
+* Use **Network Policies** to limit pod-to-pod comms
+* Tools like **Cilium**, **Calico**, or **Weave** support them
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+```
+
+#### 🛠️ Debugging Tips:
+
+* 🔒 Service unreachable? Check NSG/SG and pod NetworkPolicy
+* 🧱 Timeout but no error? Check route table or firewall silently dropping
+* 🔄 ClusterIP unreachable from outside? Not exposed through LoadBalancer or ingress
 
 ---
 
