@@ -497,33 +497,65 @@ spec:
 * 🧱 Timeout but no error? Check route table or firewall silently dropping
 * 🔄 ClusterIP unreachable from outside? Not exposed through LoadBalancer or ingress
 
-## 🚦 Deployment Strategies: Blue/Green & Canary
+## 🚦 Deployment Strategies Cheat Sheet (Blue/Green, Canary & More)
 
-### Blue/Green
+Choosing the right deployment strategy is key to reducing risk, ensuring availability, and enabling fast rollback. These strategies often involve traffic shifting, replica management, and observability hooks (metrics, alerts, feature flags).
 
-* Two environments (blue = live, green = new)
-* Swap traffic via DNS, load balancer, or Ingress
-* Pros: Zero-downtime
-* Cons: Higher infra cost
+### 🟢 Blue/Green Deployment
 
-Kubernetes example:
+**What it is:**
+Run two environments in parallel:
+
+* **Blue** is the currently live environment
+* **Green** is the new version you're testing and preparing to promote
+
+**How it works:**
+
+* Deploy the new version (green) alongside the old (blue)
+* Run smoke tests, end-to-end checks
+* Once verified, switch all traffic to green by updating:
+
+  * Load Balancer target group
+  * Kubernetes `Service` selector
+  * DNS record (less common in K8s)
+
+**Pros:**
+
+* Zero downtime (if done correctly)
+* Easy rollback: just switch back to blue
+
+**Cons:**
+
+* Duplicate resource costs
+* Manual testing or gating usually needed
+
+**Kubernetes Example:**
 
 ```yaml
-- name: green-deploy
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+spec:
   selector:
-    matchLabels:
-      version: green
+    version: green  # or 'blue', swap this to cut over
 ```
 
-Switch traffic with Ingress or service selector.
+**Pro Tip:** Use Helm or Kustomize overlays to manage separate versions declaratively.
 
-### Canary
+### 🐤 Canary Deployment
 
-* Deploy to a small % of users
-* Gradually increase replica weight
-* Use metrics/alerts to halt if issues
+**What it is:**
+Roll out new changes gradually to a subset of users/pods.
 
-Kubernetes with Argo Rollouts or Flagger:
+**How it works:**
+
+* Start with 5-10% of traffic or replicas
+* Monitor metrics like error rate, latency, saturation
+* Increase traffic in steps (e.g. 20% → 50% → 100%)
+* Halt or rollback if thresholds are breached
+
+**Kubernetes Example with Argo Rollouts:**
 
 ```yaml
 spec:
@@ -531,10 +563,104 @@ spec:
     canary:
       steps:
         - setWeight: 20
+        - pause: { duration: 5m }
+        - setWeight: 50
         - pause: { duration: 10m }
+        - setWeight: 100
 ```
 
-CI/CD Tools Support:
+**Tools That Support Canary:**
 
-* **GitLab**: Canary stages + manual approvals
-* **Argo Rollouts**: Native CRD support for progressive delivery
+* **Argo Rollouts** (Kubernetes-native CRD)
+* **Flagger** (canary + metrics-based automation)
+* **GitLab CI/CD** (canary stages + manual gates)
+* **Spinnaker**, **LaunchDarkly**, **Istio VirtualService**
+
+**Pros:**
+
+* Safer than blue/green for high-risk changes
+* Early detection of regressions
+
+**Cons:**
+
+* More complex setup
+* Observability + metrics gating are a must
+
+### 🎯 Rolling Update (K8s default)
+
+**What it is:**
+Replace old pods with new ones gradually.
+
+```yaml
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+```
+
+**Pros:**
+
+* Simple, built-in to Deployments
+* Minimises downtime (unless readiness/liveness probes misconfigured)
+
+**Cons:**
+
+* No fine-grained traffic control
+* Rollback not instantaneous if many pods updated
+
+### 🧪 A/B Testing (Feature Flag Style)
+
+**What it is:**
+Route traffic based on user attributes (e.g. headers, cookies, user cohorts). Common in frontend and API deployments.
+
+**How it works:**
+
+* Run both versions (A + B) simultaneously
+* Use gateway or reverse proxy to split traffic
+* Often coupled with **feature flags** or experimentation tools
+
+**Tools:**
+
+* Istio/Linkerd (for header-based routing)
+* LaunchDarkly
+* Unleash
+* Azure App Configuration + Feature Management SDK
+
+**Pros:**
+
+* Flexible — can test multiple dimensions
+* Real user feedback
+
+**Cons:**
+
+* Requires identity/context aware routing
+* Higher application and observability complexity
+
+### 🧯 Shadow/Traffic Mirroring
+
+**What it is:**
+Send a copy of live traffic to the new version — doesn’t affect end users.
+
+**Use case:**
+
+* Performance validation
+* Load testing new logic under production-like conditions
+
+**Tools:**
+
+* Istio mirror traffic
+* Envoy filters
+* GCP/AWS/Azure API Gateway with traffic duplication
+
+
+### 🛠️ When to Use What
+
+| Strategy       | Best For                                  | Risk Level | Rollback Difficulty       |
+| -------------- | ----------------------------------------- | ---------- | ------------------------- |
+| Blue/Green     | Major version changes                     | Low        | Easy (switch back)        |
+| Canary         | Gradual production rollout                | Medium     | Controlled                |
+| Rolling Update | Minor, backwards-compatible updates       | Low        | Medium (restart deploy)   |
+| A/B Testing    | UX/API changes based on user segments     | Medium     | Requires flag reversal    |
+| Shadowing      | Performance/load verification pre-release | None       | N/A (no real user impact) |
