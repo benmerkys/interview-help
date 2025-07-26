@@ -205,27 +205,115 @@ rate(http_requests_total[5m])
 
 ---
 
+Perfect, Ben — glad that fixed the YAML issue in the markdown file.
+
+Let’s now expand on the **"Scripting Cheat Sheet"** section of your interview prep guide.
+
+---
+
 ## 🧾 Scripting Cheat Sheet (Python, Bash, PowerShell)
 
-### Python
+Scripting is key in SRE/Platform roles for **automation**, **integration**, and **troubleshooting**. Expect to use it for provisioning, monitoring, CI/CD tasks, or data wrangling.
+
+---
+
+### 🐍 Python
+
+**Why use it:**
+
+* Great for REST APIs, cloud SDKs, JSON parsing, and CLI tools
+* Works well with libraries like `boto3` (AWS), `google-cloud`, or `requests`
+
+**Key Libraries:**
+
+* `requests` → HTTP APIs
+* `subprocess` → Shell commands
+* `boto3` → AWS automation
+* `argparse` → CLI interface
+* `json/yaml` → Config processing
+
+**Example: Call a REST API and parse response**
 
 ```python
 import requests
-r = requests.get("https://api.example.com")
-print(r.json())
+response = requests.get("https://api.example.com/health")
+if response.status_code == 200:
+    print("API is healthy:", response.json())
+else:
+    print("Error:", response.status_code)
 ```
 
-### Bash
+**Common tasks:**
+
+* Call Terraform Cloud API
+* Process Prometheus/Grafana metrics
+* Automate GitLab MR comments / labels
+
+---
+
+### 🖥️ Bash
+
+**Why use it:**
+
+* Perfect for glue code in Linux systems, CI pipelines, or cluster automation
+* Lightweight and runs everywhere
+
+**Common Patterns:**
 
 ```bash
-for pod in $(kubectl get pods -o name); do kubectl logs $pod; done
+# Loop over pods and check logs
+for pod in $(kubectl get pods -o name); do
+  echo "Logs for $pod"
+  kubectl logs $pod
+done
 ```
 
-### PowerShell
+**Handy tools to know:**
+
+* `jq` – JSON parsing
+* `awk`, `cut`, `sed` – Text processing
+* `curl` – API testing
+* `xargs` – Input pipelining
+* `grep` – Log filtering
+
+**Example: Check pods for CrashLoopBackOff**
+
+```bash
+kubectl get pods -A | grep CrashLoopBackOff
+```
+
+---
+
+### 🪟 PowerShell
+
+**Why use it:**
+
+* Ideal for Azure + Windows VMs, or when working in hybrid environments
+* Used in Azure Cloud Shell and scripts like `AzCopy` or `Get-AzResource`
+
+**Example: List all running Azure VMs**
 
 ```powershell
 Get-AzVM | Where-Object { $_.PowerState -eq "VM running" }
 ```
+
+**Other tasks:**
+
+* Manage Azure resources via `Az` module
+* Query Entra ID groups/users
+* Trigger builds or actions in Azure DevOps
+
+---
+
+### 🔧 Interview Tips
+
+✅ **Use scripting when describing automation or debugging tasks**, e.g.:
+
+* “I used Python with `boto3` to rotate secrets stored in AWS Secrets Manager automatically.”
+* “In our GitLab CI pipeline, I used Bash scripts to tag Docker images and push them to ECR.”
+* “I wrote a PowerShell script that automatically shuts down non-prod Azure VMs on weekends to save costs.”
+
+✅ **Be prepared to explain what your script does line-by-line.**
 
 ---
 
