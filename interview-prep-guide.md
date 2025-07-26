@@ -2,17 +2,17 @@
 
 ## 📚 Searchable Topics (Use CTRL+F to Jump to Sections)
 
-* Kubernetes Cheat Sheet for Technical Interviews
+* Kubernetes Cheat Sheet
 * Example - Kubernetes Pod Troubleshooting
 * Example - Kubernetes Deployment Troubleshooting
-* Terraform Cheat Sheet for SRE/Platform Interviews
-* GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
+* Terraform Cheat Sheet
+* GitLab CI/CD Cheat Sheet
 * Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
 * Scripting Cheat Sheet (Python, Bash, PowerShell)
 * Security & Networking Cheat Sheet (TLS, IAM, Secrets, Subnetting, Firewalls)
 * Deployment Strategies Cheat Sheet (Blue/Green, Canary & More)
 
-## 🧠 Kubernetes Cheat Sheet for Technical Interviews
+## 🧠 Kubernetes Cheat Sheet
 
 Kubernetes (K8s) is a powerful container orchestration platform used for automating deployment, scaling, and operations of application containers across clusters of hosts.
 
@@ -194,7 +194,7 @@ kubectl rollout undo deploy <name>
 * Use **canary strategy** via Argo Rollouts or Flagger for safer deploys
 * Monitor rollout in CI/CD before exposing via Ingress
 
-## 🧱 Terraform Cheat Sheet for SRE/Platform Interviews
+## 🧱 Terraform Cheat Sheet
 
 Terraform is a powerful open-source tool used to **provision and manage infrastructure** declaratively across cloud providers. For SRE and Platform roles, it's often used to define infrastructure-as-code (IaC), manage multi-cloud deployments, and enforce consistency via automation.
 
@@ -279,7 +279,7 @@ While Terraform is typically used for infra, you can:
 * Combine with CI/CD (GitLab) to deploy green infra, test, then cut over
 * Manage DNS, Load Balancer weights via Terraform for phased rollout
 
-## 🚀 GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
+## 🚀 GitLab CI/CD Cheat Sheet
 
 GitLab CI/CD automates the **build → test → deploy** lifecycle using a `.gitlab-ci.yml` file. It’s highly popular in cloud-native workflows, especially when combined with Terraform, Kubernetes, and security scanning tools.
 
