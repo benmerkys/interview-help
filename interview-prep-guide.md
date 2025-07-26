@@ -1,7 +1,5 @@
 # 🚀 Platform Engineer / SRE Interview Prep Guide
 
----
-
 ## 📚 Searchable Topics (Use CTRL+F to Jump to Sections)
 
 * Kubernetes Cheat Sheet for Technical Interviews
