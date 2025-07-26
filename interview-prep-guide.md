@@ -14,72 +14,185 @@
 
 ## 🧠 Kubernetes Cheat Sheet for Technical Interviews
 
-Kubernetes is a container orchestration platform. Core components:
+Kubernetes (K8s) is a powerful container orchestration platform used for automating deployment, scaling, and operations of application containers across clusters of hosts.
 
-* **API Server**: Central access point (kubectl, clients)
-* **etcd**: Stores all cluster state
-* **Controller Manager**: Ensures current state = desired state
-* **Scheduler**: Places pods on nodes
-* **Kubelet**: Node agent that manages pods
-* **Kube Proxy**: Handles virtual IPs and service load balancing
+### 🧩 Core Kubernetes Components
 
-Advanced concepts:
+| Component              | Description                                                             |
+| ---------------------- | ----------------------------------------------------------------------- |
+| **API Server**         | Central hub for all API requests (kubectl, controllers, apps)           |
+| **etcd**               | Consistent and highly available key-value store used for cluster state  |
+| **Controller Manager** | Runs background reconciliation loops for Deployments, ReplicaSets, etc. |
+| **Scheduler**          | Assigns unscheduled Pods to Nodes                                       |
+| **Kubelet**            | Agent on each Node that runs and reports pod status                     |
+| **Kube Proxy**         | Manages Service networking — cluster IPs and NAT rules                  |
 
-* **Operators**: Extend K8s logic using CRDs + controllers
-* **CRDs**: Custom resources (e.g., `KafkaCluster`)
-* **Ingress Controllers**: Manage external traffic routing
-* **Deployments**: Abstract pod updates, rolling changes
+### 🔍 Kubernetes Resource Controllers
 
-## 🚨 Example Kubernetes Troubleshooting: 60/100 Pods in Error State
+* **Deployment**: Manages ReplicaSets for rolling updates
+* **StatefulSet**: Maintains sticky identity for stateful apps
+* **DaemonSet**: Ensures one pod per node (e.g., logging, monitoring agents)
+* **Job** / **CronJob**: One-off or scheduled jobs
+* **ReplicaSet**: Ensures desired number of replicas
+* **HorizontalPodAutoscaler (HPA)**: Scales pods based on CPU/memory or custom metrics
 
-### Step 1: Overview
+### ⚙️ Ingress & Traffic Management
+
+* **Ingress Resource**: Defines routing rules
+* **Ingress Controller**: Implements them (e.g. NGINX, Traefik, Istio Gateway)
+* Use annotations for features like rate limiting, rewrite rules, TLS termination
+* **TLS** can be auto-managed via cert-manager
+
+### ⚒️ CRDs and Operators
+
+| Term         | Description                                                                         |
+| ------------ | ----------------------------------------------------------------------------------- |
+| **CRD**      | Custom Resource Definitions (extend the Kubernetes API)                             |
+| **Operator** | Custom controller that automates operational tasks for a CRD (e.g., database setup) |
+
+Real-world example:
+
+```yaml
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: my-kafka
+```
+
+## 🚨 Kubernetes Troubleshooting: 60/100 Pods in Error State
+
+### 🧭 Step 1: Cluster Overview
 
 ```bash
 kubectl get pods -A
 kubectl get events -A
+kubectl top pods -A
+kubectl top nodes
 ```
 
 Look for:
 
-* CrashLoopBackOff, OOMKilled, image issues
-* Node pressure warnings
+* `CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`, `Pending`
+* Node conditions like `MemoryPressure`, `DiskPressure`
 
-### Step 2: Logs & Status
-
-```bash
-kubectl describe pod <name>
-kubectl logs <name>
-```
-
-Pattern match across namespaces, deployments.
-
-### Step 3: Classify the Error
-
-* **CrashLoopBackOff**: Crashing repeatedly → check readiness/liveness
-* **ImagePullBackOff**: Bad tag, repo auth issue
-* **OOMKilled**: Increase memory limits
-* **Pending**: Not enough resources, taints
-
-### Step 4: Node/Network
+### 🔎 Step 2: Investigate Pod Issues
 
 ```bash
-kubectl describe node <node>
-kubectl exec -it <pod> -- curl <svc>
+kubectl describe pod <pod-name> -n <ns>
+kubectl logs <pod-name> -n <ns> --previous
 ```
+
+Check:
+
+* Env vars, volumes, secrets
+* Health probe failures
+* InitContainer errors
+
+### 📉 Step 3: Error Classifications
+
+| Error Type                   | Likely Cause                                       |
+| ---------------------------- | -------------------------------------------------- |
+| `CrashLoopBackOff`           | App crash loop due to misconfig, probe failure     |
+| `OOMKilled`                  | Memory limit too low                               |
+| `ImagePullBackOff`           | Bad tag, private registry access issue             |
+| `CreateContainerConfigError` | Missing secret/configmap                           |
+| `Pending`                    | Unschedulable: taints, resource requests, affinity |
+| `ContainerCannotRun`         | Bad command, entrypoint, permissions               |
+
+### 🧱 Step 4: Node or Networking Checks
+
+```bash
+kubectl describe node <node-name>
+kubectl exec -it <pod> -- curl http://<service>:<port>
+kubectl exec -it <pod> -- nslookup <service>
+```
+
+Validate:
+
+* Network policies
+* DNS (coredns logs, ConfigMap)
+* Ingress/Service connectivity
+
+### 🔐 Step 5: ConfigMap, Secrets, PVCs
+
+```bash
+kubectl get secrets -A
+kubectl get configmaps -A
+kubectl describe pvc <name>
+```
+
+Check volume mounts, key references, permissions.
+
+### 🔍 Step 6: Compare Healthy vs Broken Pod
+
+```bash
+kubectl get pod <healthy> -o yaml > healthy.yaml
+kubectl get pod <failing> -o yaml > broken.yaml
+diff healthy.yaml broken.yaml
+```
+
+### 🧪 Step 7: Debug Environment
+
+```bash
+kubectl run debug --rm -it --image=busybox -- /bin/sh
+```
+
+Use to test DNS, outbound access, tokens, or mount visibility.
 
 ## 🧨 Kubernetes Deployment Failing: Troubleshooting Guide
 
-### Checklist
+### 🧾 Checklist for Debugging Deployments
 
-* `kubectl describe deploy <name>`
-* Check pod events + logs
-* Validate ConfigMaps/Secrets
-* DNS issues (check CoreDNS, Service endpoints)
-* Rollback:
+```bash
+kubectl get deploy <name> -n <ns>
+kubectl describe deploy <name> -n <ns>
+kubectl rollout status deploy <name> -n <ns>
+kubectl get rs -n <ns>
+kubectl get events -n <ns>
+```
+
+1. **Rollout History**
+
+```bash
+kubectl rollout history deploy <name>
+```
+
+2. **Rollback**
 
 ```bash
 kubectl rollout undo deploy <name>
 ```
+
+3. **Check Environment Configs**
+
+   * Are ConfigMaps or Secrets missing?
+   * Are the new Pods using correct image tags?
+   * Do readiness/liveness probes fail?
+
+4. **Ingress/DNS Issues**
+
+   * Validate with `nslookup`, curl from inside pods
+   * Look at CoreDNS logs (`kubectl logs deploy/coredns -n kube-system`)
+
+5. **Pod Template Issues**
+
+   * `imagePullPolicy`, `command`, `args`, missing volumes?
+
+### 📈 Observability Tactics
+
+* Use metrics from **Prometheus** and dashboards from **Grafana** to track pod restart count, latency, and HTTP errors
+* Add alerting for:
+
+  * Deployment stuck > 10 min
+  * Restart count > 3
+  * Readiness probe failures
+
+### 🚦 Deployment Rollouts Best Practices
+
+* Use **progressDeadlineSeconds** to detect rollout stalls
+* Pair deployment with **HPA** for autoscaling
+* Use **canary strategy** via Argo Rollouts or Flagger for safer deploys
+* Monitor rollout in CI/CD before exposing via Ingress
 
 ## 🧱 Terraform Cheat Sheet for SRE/Platform Interviews
 
@@ -168,13 +281,21 @@ While Terraform is typically used for infra, you can:
 
 ## 🚀 GitLab CI/CD Cheat Sheet for SRE/Platform Interviews
 
-GitLab CI/CD is used to automate build/test/deploy using a `.gitlab-ci.yml`.
+GitLab CI/CD automates the **build → test → deploy** lifecycle using a `.gitlab-ci.yml` file. It’s highly popular in cloud-native workflows, especially when combined with Terraform, Kubernetes, and security scanning tools.
 
-### Core Concepts
+### 🧱 Core Concepts
 
-* **Stages**: Sequence (build → test → deploy)
-* **Jobs**: Units of work (per stage)
-* **Runners**: Where jobs execute (shared or custom)
+| Concept          | Description                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| **Stages**       | Define the pipeline flow (e.g., `build`, `test`, `deploy`)                          |
+| **Jobs**         | Units of work run inside stages. Can run in parallel within a stage                 |
+| **Runners**      | The compute that executes jobs. Can be **shared**, **group**, or **custom** runners |
+| **Artifacts**    | Files persisted between jobs/stages (e.g., build outputs, test logs)                |
+| **Variables**    | CI/CD secrets, runtime configs, can be protected/masked                             |
+| **Includes**     | Use `.gitlab-ci.yml` fragments from shared repos to DRY configs                     |
+| **Environments** | Logical targets for deploy (e.g., staging, prod), allow rollback                    |
+
+### 🧾 YAML Structure Example (Terraform CI/CD)
 
 ```yaml
 stages:
@@ -182,29 +303,90 @@ stages:
   - plan
   - apply
 
+validate:
+  stage: validate
+  script:
+    - terraform fmt -check
+    - terraform validate
+
 terraform-plan:
   stage: plan
   script:
     - terraform init
-    - terraform plan
+    - terraform plan -out=tfplan
+  artifacts:
+    paths:
+      - tfplan
+  only:
+    - merge_requests
+
+terraform-apply:
+  stage: apply
+  script:
+    - terraform apply -auto-approve tfplan
+  when: manual  # require approval
+  environment:
+    name: production
+```
+
+### 🔐 CI/CD Secrets and Variables
+
+* GitLab has **masked**, **protected**, and **environment-scoped** variables.
+* Can also fetch secrets dynamically using:
+
+  * **Vault integration**
+  * `gcloud secrets versions access`
+  * `aws secretsmanager get-secret-value`
+
+### 🔁 Includes & Reusability
+
+```yaml
+include:
+  - project: 'platform/ci-templates'
+    file: '/terraform.yml'
+```
+
+Use includes to maintain **shared Terraform, Helm, or Docker templates** across teams.
+
+### 📡 GitLab Environments + Review Apps
+
+GitLab environments help track where your code is deployed (e.g. `staging`, `prod`). You can:
+
+* Track deployments in the GitLab UI
+* Spin up **ephemeral review apps** per branch
+* Use `environment:url` for preview links
+
+### 🧪 Common Troubleshooting Scenarios
+
+| Problem                 | What to Check                                               |
+| ----------------------- | ----------------------------------------------------------- |
+| 🧍 Job stuck in pending | Runner tag mismatch or no runners available                 |
+| 🔑 Secret not available | Is the CI/CD variable **protected** and your branch is not? |
+| 🗃️ Cache not working   | Is `cache:key:` correct? `cache:paths:` valid?              |
+| ❌ Job fails silently    | Set `script: - set -e` to fail early                        |
+| 🗂️ Includes fail       | Wrong path or no permissions to access remote project       |
+| ❌ Terraform Apply fails | Did `terraform plan` get stored in artifacts correctly?     |
+
+### 🛡️ Best Practices
+
+* Use `only:` / `rules:` to **limit pipeline triggers**
+* Use `when: manual` for **production deploys**
+* Use `CI_COMMIT_REF_NAME` for dynamic environments
+* Lint pipelines with [GitLab CI Lint Tool](https://gitlab.com/-/ci/lint)
+
+### 🔧 Example: Dynamic Review App for K8s
+
+```yaml
+deploy-review:
+  stage: deploy
+  script:
+    - helm upgrade --install myapp ./chart --set image.tag=$CI_COMMIT_SHORT_SHA
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: https://$CI_ENVIRONMENT_SLUG.mydomain.com
   only:
     - merge_requests
 ```
-
-### Features
-
-* **Artifacts**: Persist files between stages
-* **Environments**: Track deployments
-* **Secrets/Vars**: Use CI/CD variables or vault integrations
-* **Includes**: Reuse templates across projects
-
-### Troubleshooting
-
-| Problem           | Fix                                |
-| ----------------- | ---------------------------------- |
-| Job stuck         | Runner may be missing tags         |
-| Secret missing    | Check CI/CD Variable scope         |
-| Cache not working | Validate `paths:` and `key:` usage |
 
 ## 📊 Monitoring & Logging Cheat Sheet (Prometheus, Grafana, ELK)
 
